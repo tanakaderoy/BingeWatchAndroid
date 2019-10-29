@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Binge</string>
+    <string name="api_key">a5968df59cc3e43725bcb8d5a89aa34c</string>
+    <string name="title_activity_main2">Main2Activity</string>
+    <string name="tab_text_1">Tab 1</string>
+    <string name="tab_text_2">Tab 2</string>
+</resources>

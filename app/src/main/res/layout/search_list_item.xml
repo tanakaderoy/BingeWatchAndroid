@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
+    android:layout_width="match_parent"
+    android:background="@drawable/border"
+    android:layout_height="wrap_content">
+
+    <ImageView
+        android:id="@+id/searchBackgroundImageView"
+        android:layout_width="413dp"
+        android:layout_height="302dp"
+        android:adjustViewBounds="true"
+        android:scaleType="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="w,16:9"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@color/colorAccent" />
+
+    <ImageView
+        android:id="@+id/searchPosterImageView"
+        android:layout_width="80dp"
+        android:layout_height="0dp"
+        android:adjustViewBounds="true"
+        android:scaleType="center"
+        app:layout_constraintDimensionRatio="h,1:2"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/searchBackgroundImageView"
+        app:srcCompat="@color/colorPrimary"
+        tools:layout_conversion_wrapHeight="1"
+        tools:layout_conversion_wrapWidth="1" />
+
+    <TextView
+        android:id="@+id/searchTitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="32dp"
+        android:text="TextView"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:layout_conversion_wrapHeight="50"
+        tools:layout_conversion_wrapWidth="154" />
+
+    <TextView
+        android:id="@+id/searchYearTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="76dp"
+        android:layout_marginEnd="36dp"
+        android:background="#3B000000"
+        android:text="TextView"
+        android:textColor="@android:color/white"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/searchTitleTextView"
+        tools:layout_conversion_wrapHeight="50"
+        tools:layout_conversion_wrapWidth="154" />
+
+    <TextView
+        android:id="@+id/searchSummaryTextView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:autoSizeMaxTextSize="30sp"
+        android:autoSizeMinTextSize="12sp"
+        android:autoSizeStepGranularity="2sp"
+        android:autoSizeTextType="uniform"
+        android:background="#54000000"
+        android:text="TextView"
+        android:textColor="@android:color/white"
+        app:layout_constraintBottom_toBottomOf="@+id/searchBackgroundImageView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="@+id/searchPosterImageView"
+        app:layout_constraintTop_toBottomOf="@+id/searchPosterImageView"
+        tools:layout_conversion_wrapHeight="368"
+        tools:layout_conversion_wrapWidth="1047" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
