@@ -1,25 +1,31 @@
 package com.tanaka.binge.Views;
 
 import android.content.Intent;
-import android.graphics.drawable.AnimationDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
-import com.squareup.picasso.Picasso;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.tanaka.binge.Controllers.ProviderActivity;
+import com.tanaka.binge.Controllers.ShowActivity;
 import com.tanaka.binge.ImageSize;
 import com.tanaka.binge.Models.TvShowResult;
-import com.tanaka.binge.Controllers.ProviderActivity;
 import com.tanaka.binge.R;
-import com.tanaka.binge.Controllers.ShowActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,7 +35,10 @@ import java.util.List;
 public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder>{
 
     private List<TvShowResult> tvShowResultList;
-
+    ArrayList<TvShowResult> favoritesList = new ArrayList<>();
+    private FirebaseFirestore db = FirebaseFirestore.getInstance();
+    private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    private CollectionReference tvShowRef;
 
     public HomeAdapter(List<TvShowResult> listdata) {
         this.tvShowResultList = listdata;
@@ -44,12 +53,27 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder>{
         return viewHolder;
     }
 
+    public void setFavoritesList(ArrayList<TvShowResult> favoritesList) {
+        this.favoritesList = favoritesList;
+    }
+
+    public void clear() {
+        tvShowResultList.clear();
+        notifyDataSetChanged();
+    }
+
+    public void addAll(ArrayList<TvShowResult> list) {
+        tvShowResultList.addAll(list);
+        notifyDataSetChanged();
+    }
+
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-TvShowResult tvShow = tvShowResultList.get(position);
+    public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
+        final TvShowResult tvShow = tvShowResultList.get(position);
         holder.titleTextView.setText(tvShow.getName());
         holder.summaryTextView.setText(tvShow.getOverview());
         holder.yearTextView.setText(tvShow.getFirstAirDate());
+
         Glide.with(holder.itemView)
                 .load("https://image.tmdb.org/t/p/"+ImageSize.w780+tvShow.getPosterPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
                 .fitCenter().into(holder.posterImageView);
@@ -60,7 +84,67 @@ TvShowResult tvShow = tvShowResultList.get(position);
 //        Picasso.get().load("https://image.tmdb.org/t/p/"+ ImageSize.w780+tvShow.getBackdropPath()).fit().into(holder.background);
         holder.backdropURL = "https://image.tmdb.org/t/p/"+ImageSize.original+tvShow.getBackdropPath();
         holder.showID = tvShow.getId();
+        if (currentUser == null) {
+            holder.favoriteButton.setVisibility(View.INVISIBLE);
+        }
 
+
+        holder.favoriteButton.setChecked(false);
+
+        for (TvShowResult favShow : favoritesList) {
+            if (tvShow.getId().equals(favShow.getId())) {
+                holder.favoriteButton.setChecked(true);
+            }
+        }
+        holder.favoriteButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (holder.favoriteButton.isChecked()) {
+                    favoriteShow(tvShow, holder);
+                } else {
+                    unFavoriteShow(tvShow, holder);
+                }
+            }
+        });
+
+
+    }
+
+    private void unFavoriteShow(TvShowResult tvShow, final ViewHolder holder) {
+        if (currentUser != null) {
+            tvShowRef = db.collection("FavShows").document(currentUser.getEmail()).collection("TvShows");
+
+            tvShowRef.document(tvShow.getName()).delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    Toast.makeText(holder.itemView.getContext(), "Delete Success", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(holder.itemView.getContext(), "Delete Failed", Toast.LENGTH_SHORT).show();
+
+                }
+            });
+        }
+    }
+
+    private void favoriteShow(TvShowResult tvShow, final ViewHolder holder) {
+        if (currentUser != null) {
+            tvShowRef = db.collection("FavShows").document(currentUser.getEmail()).collection("TvShows");
+            tvShowRef.document(tvShow.getName()).set(tvShow).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(holder.itemView.getContext(), "Failure to Favorite: " + e.toString(), Toast.LENGTH_SHORT).show();
+
+                }
+            });
+        }
 
     }
 
@@ -74,6 +158,7 @@ TvShowResult tvShow = tvShowResultList.get(position);
         public TextView titleTextView;
         TextView yearTextView;
         TextView summaryTextView;
+        ToggleButton favoriteButton;
 
         ImageView background;
         String backdropURL = "";
@@ -89,14 +174,17 @@ TvShowResult tvShow = tvShowResultList.get(position);
             yearTextView = itemView.findViewById(R.id.yearTextView);
             summaryTextView = itemView.findViewById(R.id.summaryTextView);
             background = itemView.findViewById(R.id.backgroundImageView);
+            favoriteButton = itemView.findViewById(R.id.favButton);
+
+
 
         }
+
 
         private void setUpClickListeners(@NonNull final View itemView) {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(itemView.getContext(), "Clicked" + titleTextView.getText(), Toast.LENGTH_SHORT).show();
                     Intent intent = new Intent(itemView.getContext(), ShowActivity.class);
                     intent.putExtra("backdropImage", backdropURL);
                     intent.putExtra("showID", showID);

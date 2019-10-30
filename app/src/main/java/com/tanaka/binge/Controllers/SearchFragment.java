@@ -20,10 +20,10 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.tanaka.binge.ApiInterface;
-import com.tanaka.binge.Models.Result;
 import com.tanaka.binge.Models.SearchResultModel;
+import com.tanaka.binge.Models.TvShowResult;
 import com.tanaka.binge.R;
-import com.tanaka.binge.Views.SearchAdapter;
+import com.tanaka.binge.Views.HomeAdapter;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -50,12 +50,14 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
     Retrofit retrofit;
     OkHttpClient client;
     private RecyclerView recyclerView;
-    private SearchAdapter adapter;
+    private HomeAdapter adapter;
     private ProgressDialog progressDialog;
-    private ArrayList<Result> showResultList;
+    private ArrayList<TvShowResult> showResultList;
     private LinearLayoutManager linearLayoutManager;
     private TextView prompTextView;
 
+    public SearchFragment() {
+    }
 
     @Nullable
     @Override
@@ -78,7 +80,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
         linearLayoutManager = new LinearLayoutManager(view.getContext());
 
         showResultList = new ArrayList<>();
-        adapter = new SearchAdapter(showResultList);
+        adapter = new HomeAdapter(showResultList);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
         progressDialog = new ProgressDialog(view.getContext());
@@ -153,7 +155,8 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
         apiInterface.searchForTMDBShow(showName).enqueue(new Callback<SearchResultModel>() {
             @Override
             public void onResponse(Call<SearchResultModel> call, Response<SearchResultModel> response) {
-                generateDataList(response.body().getResults());
+                adapter.clear();
+                adapter.addAll((ArrayList<TvShowResult>) response.body().getResults());
                 progressDialog.dismiss();
 
             }
@@ -167,7 +170,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
     }
 
 
-    private void generateDataList(List<Result> tvShowResults) {
+    private void generateDataList(List<TvShowResult> tvShowResults) {
 //adapter.setShowID
         showResultList.addAll(tvShowResults);
         adapter.notifyDataSetChanged();

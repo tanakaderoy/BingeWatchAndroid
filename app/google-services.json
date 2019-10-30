@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "468365023723",
+    "firebase_url": "https://bingewatch-d81c8.firebaseio.com",
+    "project_id": "bingewatch-d81c8",
+    "storage_bucket": "bingewatch-d81c8.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:468365023723:android:e17af1c2236d3b633b61ae",
+        "android_client_info": {
+          "package_name": "com.tanaka.binge"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "468365023723-0dl24g7sqb9kt60jo8ka6us8qov6nv9i.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tanaka.binge",
+            "certificate_hash": "0e0797fbd5afa5dc1b8599542b085021dc9831ba"
+          }
+        },
+        {
+          "client_id": "468365023723-f5lsbo05qd11saonlikhk1hkjh2t5jh8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBM_WS99XQN0lrG-xmi8-ChS1QOCXvRu2g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "468365023723-f5lsbo05qd11saonlikhk1hkjh2t5jh8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

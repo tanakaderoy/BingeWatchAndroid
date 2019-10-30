@@ -23,11 +23,11 @@
         android:id="@+id/posterImageView"
         android:layout_width="127dp"
         android:layout_height="244dp"
+        android:adjustViewBounds="true"
+        android:scaleType="center"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@color/colorPrimary"
-        android:adjustViewBounds="true"
-        android:scaleType="center"
         tools:layout_conversion_wrapHeight="1"
         tools:layout_conversion_wrapWidth="1" />
 
@@ -65,8 +65,8 @@
         android:autoSizeMinTextSize="12sp"
         android:autoSizeStepGranularity="2sp"
         android:autoSizeTextType="uniform"
-        android:scrollbars="vertical"
         android:background="#54000000"
+        android:scrollbars="vertical"
         android:text="TextView"
         android:textColor="@android:color/white"
         android:textSize="23sp"
@@ -77,5 +77,18 @@
         app:layout_constraintTop_toBottomOf="@+id/posterImageView"
         tools:layout_conversion_wrapHeight="368"
         tools:layout_conversion_wrapWidth="1047" />
+
+    <ToggleButton
+        android:id="@+id/favButton"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:background="@drawable/toggle_image"
+        android:text="Favorite"
+        android:textOff=""
+        android:textOn=""
+        app:layout_constraintBottom_toTopOf="@+id/summaryTextView"
+        app:layout_constraintEnd_toEndOf="@+id/backgroundImageView"
+        app:layout_constraintTop_toBottomOf="@+id/yearTextView"
+        app:srcCompat="@android:drawable/btn_star" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

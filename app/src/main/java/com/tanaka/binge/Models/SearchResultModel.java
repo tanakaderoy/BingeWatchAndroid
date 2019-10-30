@@ -1,8 +1,9 @@
 package com.tanaka.binge.Models;
 
-import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import java.util.List;
 
 public class SearchResultModel {
 
@@ -17,7 +18,7 @@ private Integer totalResults;
 private Integer totalPages;
 @SerializedName("results")
 @Expose
-private List<Result> results = null;
+private List<TvShowResult> results = null;
 
 public Integer getPage() {
 return page;
@@ -43,11 +44,11 @@ public void setTotalPages(Integer totalPages) {
 this.totalPages = totalPages;
 }
 
-public List<Result> getResults() {
+    public List<TvShowResult> getResults() {
 return results;
 }
 
-public void setResults(List<Result> results) {
+    public void setResults(List<TvShowResult> results) {
 this.results = results;
 }
 

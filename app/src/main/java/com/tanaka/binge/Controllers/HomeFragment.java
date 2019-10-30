@@ -13,7 +13,17 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.EventListener;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.tanaka.binge.ApiInterface;
 import com.tanaka.binge.Models.TrendingResponseModel;
 import com.tanaka.binge.Models.TvShowResult;
@@ -58,8 +68,14 @@ public class HomeFragment extends Fragment {
     private int TOTAL_PAGES = 10;
     private int currentPage = PAGE_START;
     BottomNavigationView bottomNav;
+    public final static String GOOGLE_ACCOUNT = "googleAccount";
+    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    ArrayList<TvShowResult> favoritesList = new ArrayList<>();
+    private CollectionReference tvShowRef;
 
-
+    public HomeFragment() {
+    }
 
     @Nullable
     @Override
@@ -73,6 +89,10 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         recyclerView = view.findViewById(R.id.homeRecyclerView);
         linearLayoutManager = new LinearLayoutManager(view.getContext());
+        if (currentUser != null) {
+            tvShowRef = db.collection("FavShows").document(currentUser.getEmail()).collection("TvShows");
+
+        }
 
         showResultList = new ArrayList<>();
         adapter = new HomeAdapter(showResultList);
@@ -81,6 +101,10 @@ public class HomeFragment extends Fragment {
         progressDialog = new ProgressDialog(view.getContext());
         progressDialog.setMessage("Loading....");
         progressDialog.show();
+        if (currentUser != null) {
+            loadFavorites();
+        }
+
         setUpRetrofit();
         System.out.println("about to fetch data");
         fetchData();
@@ -181,6 +205,49 @@ public class HomeFragment extends Fragment {
                 Toast.makeText(getContext(), "Something went wrong...Please try later!", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        if (currentUser != null) {
+            tvShowRef = db.collection("FavShows").document(currentUser.getEmail()).collection("TvShows");
+
+
+            tvShowRef.addSnapshotListener(new EventListener<QuerySnapshot>() {
+                @Override
+                public void onEvent(@Nullable QuerySnapshot queryDocumentSnapshots, @Nullable FirebaseFirestoreException e) {
+                    if (e != null) {
+                        return;
+                    }
+
+                    adapter.setFavoritesList((ArrayList<TvShowResult>) queryDocumentSnapshots.toObjects(TvShowResult.class));
+                    adapter.notifyDataSetChanged();
+
+                }
+            });
+        }
+    }
+
+    private void loadFavorites() {
+        tvShowRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                    TvShowResult favShow = documentSnapshot.toObject(TvShowResult.class);
+                    favoritesList.add(favShow);
+                }
+                adapter.setFavoritesList(favoritesList);
+                adapter.notifyDataSetChanged();
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+
+            }
+        });
+
     }
 
 

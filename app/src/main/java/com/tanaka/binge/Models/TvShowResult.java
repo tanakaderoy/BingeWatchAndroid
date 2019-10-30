@@ -50,6 +50,9 @@ public class TvShowResult {
     @Expose
     private String mediaType;
 
+    public TvShowResult() {
+    }
+
     public String getOriginalName() {
         return originalName;
     }

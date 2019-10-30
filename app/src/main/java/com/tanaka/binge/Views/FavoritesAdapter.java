@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ToggleButton;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -14,72 +15,90 @@ import com.bumptech.glide.Glide;
 import com.tanaka.binge.Controllers.ProviderActivity;
 import com.tanaka.binge.Controllers.ShowActivity;
 import com.tanaka.binge.ImageSize;
-import com.tanaka.binge.Models.Result;
+import com.tanaka.binge.Models.TvShowResult;
 import com.tanaka.binge.R;
 
-import java.util.List;
+import java.util.ArrayList;
 
 /**
- * Created by Tanaka Mazi on 2019-10-27.
+ * Created by Tanaka Mazi on 2019-10-29.
  * Copyright (c) 2019 All rights reserved.
  */
-public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder> {
-    private List<Result> tvShowResultList;
-    public SearchAdapter(List<Result> listdata) {
-        this.tvShowResultList = listdata;
+public class FavoritesAdapter extends RecyclerView.Adapter<FavoritesAdapter.ViewHolder> {
+    ArrayList<TvShowResult> favShows;
+
+    public FavoritesAdapter(ArrayList<TvShowResult> favShows) {
+        this.favShows = favShows;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());
-        View searchListItem = layoutInflater.inflate(R.layout.search_list_item, parent, false);
-        SearchAdapter.ViewHolder viewHolder = new SearchAdapter.ViewHolder(searchListItem);
+        View homeListItem = layoutInflater.inflate(R.layout.home_list_item, parent, false);
+        FavoritesAdapter.ViewHolder viewHolder = new FavoritesAdapter.ViewHolder(homeListItem);
         return viewHolder;
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Result tvShow = tvShowResultList.get(position);
-        
+        final TvShowResult tvShow = favShows.get(position);
         holder.titleTextView.setText(tvShow.getName());
         holder.summaryTextView.setText(tvShow.getOverview());
         holder.yearTextView.setText(tvShow.getFirstAirDate());
+
         Glide.with(holder.itemView)
-                .load("https://image.tmdb.org/t/p/"+ImageSize.w780+tvShow.getPosterPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
+                .load("https://image.tmdb.org/t/p/" + ImageSize.w780 + tvShow.getPosterPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
                 .fitCenter().into(holder.posterImageView);
-//        Picasso.get().load("https://image.tmdb.org/t/p/"+ ImageSize.w780+tvShow.getPosterPath()).into(holder.posterImageView);
-//        Picasso.get().load("https://image.tmdb.org/t/p/"+ImageSize.w780+tvShow.getBackdropPath()).fit().into(holder.background);
+//        Picasso.get().load("https://image.tmdb.org/t/p/"+ImageSize.w780+tvShow.getPosterPath()).into(holder.posterImageView);
         Glide.with(holder.itemView)
-                .load("https://image.tmdb.org/t/p/"+ImageSize.w780+tvShow.getBackdropPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
+                .load("https://image.tmdb.org/t/p/" + ImageSize.w780 + tvShow.getBackdropPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
                 .into(holder.background);
-        holder.backdropURL = "https://image.tmdb.org/t/p/"+ImageSize.original+tvShow.getBackdropPath();
+//        Picasso.get().load("https://image.tmdb.org/t/p/"+ ImageSize.w780+tvShow.getBackdropPath()).fit().into(holder.background);
+        holder.backdropURL = "https://image.tmdb.org/t/p/" + ImageSize.original + tvShow.getBackdropPath();
         holder.showID = tvShow.getId();
+
     }
+
+    public void clear() {
+        favShows.clear();
+        notifyDataSetChanged();
+    }
+
+    public void addAll(ArrayList<TvShowResult> list) {
+        favShows.addAll(list);
+        notifyDataSetChanged();
+    }
+
 
     @Override
     public int getItemCount() {
-        return tvShowResultList.size();
+        return favShows.size();
     }
 
-    class ViewHolder extends  RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView posterImageView;
         public TextView titleTextView;
         TextView yearTextView;
         TextView summaryTextView;
+        ToggleButton favoriteButton;
 
         ImageView background;
         String backdropURL = "";
         int showID = 0;
 
-        public ViewHolder(@NonNull View itemView) {
+
+        public ViewHolder(@NonNull final View itemView) {
             super(itemView);
             setUpClickListeners(itemView);
-            this.posterImageView = itemView.findViewById(R.id.searchPosterImageView);
-            this.titleTextView = itemView.findViewById(R.id.searchTitleTextView);
-            yearTextView = itemView.findViewById(R.id.searchYearTextView);
-            summaryTextView = itemView.findViewById(R.id.searchSummaryTextView);
-            background = itemView.findViewById(R.id.searchBackgroundImageView);
+            this.posterImageView = itemView.findViewById(R.id.posterImageView);
+            this.titleTextView = itemView.findViewById(R.id.titleTextView);
+            yearTextView = itemView.findViewById(R.id.yearTextView);
+            summaryTextView = itemView.findViewById(R.id.summaryTextView);
+            background = itemView.findViewById(R.id.backgroundImageView);
+            favoriteButton = itemView.findViewById(R.id.favButton);
+
+
         }
 
 
@@ -105,8 +124,5 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
                 }
             });
         }
-
     }
-
-
 }
