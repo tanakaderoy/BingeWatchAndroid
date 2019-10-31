@@ -122,7 +122,17 @@ public class MainActivity extends AppCompatActivity {
         }
         int limit = (adapter.getCount() > 1 ? adapter.getCount() - 1 : 1);
         viewPager.setOffscreenPageLimit(limit);
+
         viewPager.setAdapter(adapter);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (viewPager.getCurrentItem() != 0) {
+            viewPager.setCurrentItem(0, true);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override

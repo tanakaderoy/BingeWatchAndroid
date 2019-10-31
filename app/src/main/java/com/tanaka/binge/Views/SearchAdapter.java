@@ -45,12 +45,13 @@ public class SearchAdapter extends RecyclerView.Adapter<SearchAdapter.ViewHolder
         holder.titleTextView.setText(tvShow.getName());
         holder.summaryTextView.setText(tvShow.getOverview());
         holder.yearTextView.setText(tvShow.getFirstAirDate());
-        Glide.with(holder.itemView)
+        Glide.with(holder.itemView.getContext()).clear(holder.posterImageView);
+        Glide.with(holder.itemView.getContext())
                 .load("https://image.tmdb.org/t/p/"+ImageSize.w780+tvShow.getPosterPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
                 .fitCenter().into(holder.posterImageView);
 //        Picasso.get().load("https://image.tmdb.org/t/p/"+ ImageSize.w780+tvShow.getPosterPath()).into(holder.posterImageView);
 //        Picasso.get().load("https://image.tmdb.org/t/p/"+ImageSize.w780+tvShow.getBackdropPath()).fit().into(holder.background);
-        Glide.with(holder.itemView)
+        Glide.with(holder.itemView.getContext())
                 .load("https://image.tmdb.org/t/p/"+ImageSize.w780+tvShow.getBackdropPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
                 .into(holder.background);
         holder.backdropURL = "https://image.tmdb.org/t/p/"+ImageSize.original+tvShow.getBackdropPath();

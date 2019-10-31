@@ -66,11 +66,11 @@ public class ShowActivity extends AppCompatActivity {
         showBackdropImageView = findViewById(R.id.showBackDropImageView);
         backdropURL = intent.getStringExtra("backdropImage");
 //        Picasso.get().load(backdropURL).fit().into(showBackdropImageView);
-        Glide.with(this)
-                .load(backdropURL).thumbnail(Glide.with(this).load(R.drawable.loading))
+        Glide.with(getApplicationContext())
+                .load(backdropURL).thumbnail(Glide.with(getApplicationContext()).load(R.drawable.loading))
                 .into(showBackdropImageView);
         recyclerView = findViewById(R.id.seasonsRecyclerView);
-        linearLayoutManager = new LinearLayoutManager(this, RecyclerView.HORIZONTAL, false);
+        linearLayoutManager = new LinearLayoutManager(getApplicationContext(), RecyclerView.HORIZONTAL, false);
 
         seasonsList = new ArrayList<>();
         adapter = new SeasonAdapter(seasonsList);
@@ -92,7 +92,7 @@ public class ShowActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call<ShowResponseModel> call, Throwable t) {
-                Toast.makeText(ShowActivity.this, "Something went wrong: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Something went wrong: " + t.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -126,28 +126,30 @@ public class ShowActivity extends AppCompatActivity {
     }
 
     public void pickForMe(View view) {
-        Random generator = new Random();
-        int randomIndex = generator.nextInt(seasonsList.size());
-        Season season = seasonsList.get(randomIndex);
-        int randomEpisode = generator.nextInt(season.getEpisodeCount());
-        Intent intent = new Intent(getApplicationContext(), EpisodeInfoActivity.class);
-        RecyclerView.SmoothScroller smoothScroller = new
-                LinearSmoothScroller(this) {
-                    @Override
-                    protected int getVerticalSnapPreference() {
-                        return LinearSmoothScroller.SNAP_TO_START;
-                    }
-                };
+        if (seasonsList.size() > 0) {
+            Random generator = new Random();
+            int randomIndex = generator.nextInt(seasonsList.size());
+            Season season = seasonsList.get(randomIndex);
+            int randomEpisode = generator.nextInt(season.getEpisodeCount());
+            Intent intent = new Intent(getApplicationContext(), EpisodeInfoActivity.class);
+            RecyclerView.SmoothScroller smoothScroller = new
+                    LinearSmoothScroller(getApplicationContext()) {
+                        @Override
+                        protected int getVerticalSnapPreference() {
+                            return LinearSmoothScroller.SNAP_TO_START;
+                        }
+                    };
 
             smoothScroller.setTargetPosition(randomIndex);
             linearLayoutManager.startSmoothScroll(smoothScroller);
-        intent.putExtra("backdropImage", backdropURL);
-        intent.putExtra("showID", showID);
-        intent.putExtra("seasonNumber", season.getSeasonNumber());
-        intent.putExtra("seasonName", season.getName());
-        intent.putExtra("showName", showName);
-        intent.putExtra("episodeNumber", randomEpisode);
-        startActivityForResult(intent, 1);
+            intent.putExtra("backdropImage", backdropURL);
+            intent.putExtra("showID", showID);
+            intent.putExtra("seasonNumber", season.getSeasonNumber());
+            intent.putExtra("seasonName", season.getName());
+            intent.putExtra("showName", showName);
+            intent.putExtra("episodeNumber", randomEpisode);
+            startActivityForResult(intent, 1);
+        }
 
         //if let season = seasons.randomElement(), let seasonNumber = season.seasonNumber, let episodeCount = season.episodeCount{
         //            randomEpisode = String(arc4random_uniform(UInt32(episodeCount)) + 1)

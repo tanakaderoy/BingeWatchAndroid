@@ -2,6 +2,7 @@ package com.tanaka.binge.Controllers;
 
 import android.app.ProgressDialog;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,6 +53,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * Copyright (c) 2019 All rights reserved.
  */
 public class HomeFragment extends Fragment {
+    public final static String GOOGLE_ACCOUNT = "googleAccount";
+    private static final int PAGE_START = 1;
+    static ArrayList<TvShowResult> favoritesList = new ArrayList<>();
+    BottomNavigationView bottomNav;
+    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
     private RecyclerView recyclerView;
     private HomeAdapter adapter;
     private ApiInterface apiInterface;
@@ -60,18 +67,11 @@ public class HomeFragment extends Fragment {
     private OkHttpClient client;
     private ArrayList<TvShowResult> showResultList;
     private LinearLayoutManager linearLayoutManager;
-
-    private static final int PAGE_START = 1;
     private boolean isLoading = false;
     private boolean isLastPage = false;
     // limiting to 5 for this tutorial, since total pages in actual API is very large. Feel free to modify.
     private int TOTAL_PAGES = 10;
     private int currentPage = PAGE_START;
-    BottomNavigationView bottomNav;
-    public final static String GOOGLE_ACCOUNT = "googleAccount";
-    FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-    FirebaseFirestore db = FirebaseFirestore.getInstance();
-    ArrayList<TvShowResult> favoritesList = new ArrayList<>();
     private CollectionReference tvShowRef;
 
     public HomeFragment() {
@@ -82,7 +82,7 @@ public class HomeFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
 
 
-        return inflater.inflate(R.layout.home_fragment, container , false);
+        return inflater.inflate(R.layout.home_fragment, container, false);
     }
 
     @Override
@@ -100,21 +100,28 @@ public class HomeFragment extends Fragment {
         recyclerView.setAdapter(adapter);
         progressDialog = new ProgressDialog(view.getContext());
         progressDialog.setMessage("Loading....");
-        progressDialog.show();
         if (currentUser != null) {
             loadFavorites();
         }
 
         setUpRetrofit();
         System.out.println("about to fetch data");
-        fetchData();
+        if (savedInstanceState == null) {
+            progressDialog.show();
+
+            fetchData();
+        } else {
+            adapter.addAll(savedInstanceState.<TvShowResult>getParcelableArrayList("TvShows"));
+        }
         System.out.println(showResultList);
         recyclerView.addOnScrollListener(new PaginationScrollListener(linearLayoutManager) {
             @Override
             protected void loadMoreItems() {
                 isLoading = true;
                 currentPage += 1;
-
+                if (currentUser != null) {
+                    loadFavorites();
+                }
                 progressDialog.show();
                 loadNextPage();
             }
@@ -134,6 +141,26 @@ public class HomeFragment extends Fragment {
                 return isLoading;
             }
         });
+        Log.i("Created", "Created");
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelableArrayList("TvShows", showResultList);
+        Log.i("Saved", "Saved");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.i("Resumed", "Resumed");
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.i("Pause", "Paused");
 
     }
 
@@ -165,12 +192,11 @@ public class HomeFragment extends Fragment {
             @Override
             public okhttp3.Response intercept(Chain chain) throws IOException {
                 Request request = chain.request();
-                HttpUrl url = request.url().newBuilder().addQueryParameter("api_key",getString(R.string.api_key)).build();
+                HttpUrl url = request.url().newBuilder().addQueryParameter("api_key", getString(R.string.api_key)).build();
                 request = request.newBuilder().url(url).build();
                 return chain.proceed(request);
             }
-        }).addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)).build();
-
+        }).addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC)).build();
 
 
         retrofit = new Retrofit.Builder()
@@ -226,6 +252,7 @@ public class HomeFragment extends Fragment {
 
                 }
             });
+
         }
     }
 
@@ -249,7 +276,6 @@ public class HomeFragment extends Fragment {
         });
 
     }
-
 
 
     private void generateDataList(List<TvShowResult> tvShowResults) {

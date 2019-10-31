@@ -117,7 +117,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
 
             @Override
             public boolean onMenuItemActionCollapse(MenuItem item) {
-                if(showResultList.isEmpty()) {
+                if (showResultList.isEmpty()) {
                     prompTextView.setVisibility(View.VISIBLE);
                 }
                 return true;
@@ -126,7 +126,6 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
 
 
     }
-
 
 
     private void setUpRetrofit() {
@@ -152,11 +151,28 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
     }
 
     private void searchForShow(String showName) {
+        adapter.setFavoritesList(HomeFragment.favoritesList);
         apiInterface.searchForTMDBShow(showName).enqueue(new Callback<SearchResultModel>() {
             @Override
             public void onResponse(Call<SearchResultModel> call, Response<SearchResultModel> response) {
                 adapter.clear();
-                adapter.addAll((ArrayList<TvShowResult>) response.body().getResults());
+                ArrayList<TvShowResult> tvShowResults = new ArrayList<>();
+                if (response.body().getTotalResults() > 0 && response.body().getTotalResults() > 20) {
+                    for (int i = 0; i < 8; i++) {//
+                        if (response.body().getResults().get(i).getName() != null && response.body().getResults().get(i).getBackdropPath() != null) {
+                            tvShowResults.add(response.body().getResults().get(i));
+                        }//
+                    }
+
+                    adapter.addAll(tvShowResults);
+                } else {
+                    for (TvShowResult tvShow : response.body().getResults()) {
+                        if (tvShow.getName() != null && tvShow.getBackdropPath() != null) {
+                            tvShowResults.add(tvShow);
+                        }
+                    }
+                    adapter.addAll(tvShowResults);
+                }
                 progressDialog.dismiss();
 
             }
@@ -189,7 +205,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
 
     @Override
     public boolean onQueryTextChange(String newText) {
-        if(newText.isEmpty()){
+        if (newText.isEmpty()) {
 
             prompTextView.setVisibility(View.VISIBLE);
             showResultList.clear();

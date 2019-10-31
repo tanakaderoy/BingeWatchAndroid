@@ -1,5 +1,6 @@
 package com.tanaka.binge.Controllers;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
@@ -30,6 +31,8 @@ public class LoginActivity extends AppCompatActivity {
     private SignInButton googleSignInButton;
     private GoogleSignInClient googleSignInClient;
     private FirebaseAuth mAuth;
+    private ProgressDialog progressDialog;
+
 
 
     @Override
@@ -37,6 +40,8 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         mAuth = FirebaseAuth.getInstance();
+        progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Loading...");
         googleSignInButton = findViewById(R.id.sign_in_button);
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id1))
@@ -46,6 +51,7 @@ public class LoginActivity extends AppCompatActivity {
         googleSignInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                progressDialog.show();
                 Intent signInIntent = googleSignInClient.getSignInIntent();
                 startActivityForResult(signInIntent, 101);
             }
@@ -59,7 +65,6 @@ public class LoginActivity extends AppCompatActivity {
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            Toast.makeText(this, "Already Logged In", Toast.LENGTH_SHORT).show();
             onLoggedIn(currentUser);
         } else {
             googleSignInClient.signOut();
@@ -75,6 +80,7 @@ public class LoginActivity extends AppCompatActivity {
                 try {
                     // The Task returned from this call is always completed, no need to attach
                     // a listener.
+                    progressDialog.dismiss();
                     Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
                     GoogleSignInAccount account = task.getResult(ApiException.class);
                     firebaseAuthWithGoogle(account);

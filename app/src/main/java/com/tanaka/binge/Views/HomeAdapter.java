@@ -32,16 +32,22 @@ import java.util.List;
  * Created by Tanaka Mazi on 2019-10-19.
  * Copyright (c) 2019 All rights reserved.
  */
-public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder>{
+public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
 
-    private List<TvShowResult> tvShowResultList;
     ArrayList<TvShowResult> favoritesList = new ArrayList<>();
+    private List<TvShowResult> tvShowResultList;
     private FirebaseFirestore db = FirebaseFirestore.getInstance();
     private FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
     private CollectionReference tvShowRef;
 
     public HomeAdapter(List<TvShowResult> listdata) {
+
         this.tvShowResultList = listdata;
+    }
+
+    public void filterTvShowResultList() {
+
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -54,6 +60,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder>{
     }
 
     public void setFavoritesList(ArrayList<TvShowResult> favoritesList) {
+
         this.favoritesList = favoritesList;
     }
 
@@ -70,19 +77,22 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position) {
         final TvShowResult tvShow = tvShowResultList.get(position);
+
         holder.titleTextView.setText(tvShow.getName());
         holder.summaryTextView.setText(tvShow.getOverview());
         holder.yearTextView.setText(tvShow.getFirstAirDate());
+        Glide.with(holder.itemView.getContext()).clear(holder.background);
+        Glide.with(holder.itemView.getContext()).clear(holder.posterImageView);
 
-        Glide.with(holder.itemView)
-                .load("https://image.tmdb.org/t/p/"+ImageSize.w780+tvShow.getPosterPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
+        Glide.with(holder.itemView.getContext())
+                .load("https://image.tmdb.org/t/p/" + ImageSize.w500 + tvShow.getPosterPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
                 .fitCenter().into(holder.posterImageView);
 //        Picasso.get().load("https://image.tmdb.org/t/p/"+ImageSize.w780+tvShow.getPosterPath()).into(holder.posterImageView);
-        Glide.with(holder.itemView)
-                .load("https://image.tmdb.org/t/p/"+ImageSize.w780+tvShow.getBackdropPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
+        Glide.with(holder.itemView.getContext())
+                .load("https://image.tmdb.org/t/p/" + ImageSize.w780 + tvShow.getBackdropPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
                 .into(holder.background);
 //        Picasso.get().load("https://image.tmdb.org/t/p/"+ ImageSize.w780+tvShow.getBackdropPath()).fit().into(holder.background);
-        holder.backdropURL = "https://image.tmdb.org/t/p/"+ImageSize.original+tvShow.getBackdropPath();
+        holder.backdropURL = "https://image.tmdb.org/t/p/" + ImageSize.w780 + tvShow.getBackdropPath();
         holder.showID = tvShow.getId();
         if (currentUser == null) {
             holder.favoriteButton.setVisibility(View.INVISIBLE);
@@ -153,9 +163,9 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder>{
         return tvShowResultList.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
-        public ImageView posterImageView;
-        public TextView titleTextView;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        ImageView posterImageView;
+        TextView titleTextView;
         TextView yearTextView;
         TextView summaryTextView;
         ToggleButton favoriteButton;
@@ -165,8 +175,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder>{
         int showID = 0;
 
 
-
-        public ViewHolder(@NonNull final View itemView) {
+        ViewHolder(@NonNull final View itemView) {
             super(itemView);
             setUpClickListeners(itemView);
             this.posterImageView = itemView.findViewById(R.id.posterImageView);
@@ -175,7 +184,6 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder>{
             summaryTextView = itemView.findViewById(R.id.summaryTextView);
             background = itemView.findViewById(R.id.backgroundImageView);
             favoriteButton = itemView.findViewById(R.id.favButton);
-
 
 
         }

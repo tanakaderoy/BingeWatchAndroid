@@ -1,11 +1,15 @@
 package com.tanaka.binge.Models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class TvShowResult {
+public class TvShowResult implements Parcelable {
 
     @SerializedName("original_name")
     @Expose
@@ -165,4 +169,56 @@ public class TvShowResult {
         this.mediaType = mediaType;
     }
 
+    public static final Parcelable.Creator<TvShowResult> CREATOR = new Parcelable.Creator<TvShowResult>() {
+        @Override
+        public TvShowResult createFromParcel(Parcel source) {
+            return new TvShowResult(source);
+        }
+
+        @Override
+        public TvShowResult[] newArray(int size) {
+            return new TvShowResult[size];
+        }
+    };
+
+    protected TvShowResult(Parcel in) {
+        this.originalName = in.readString();
+        this.id = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.name = in.readString();
+        this.voteCount = (Integer) in.readValue(Integer.class.getClassLoader());
+        this.voteAverage = (Double) in.readValue(Double.class.getClassLoader());
+        this.firstAirDate = in.readString();
+        this.posterPath = in.readString();
+        this.genreIds = new ArrayList<Integer>();
+        in.readList(this.genreIds, Integer.class.getClassLoader());
+        this.originalLanguage = in.readString();
+        this.backdropPath = in.readString();
+        this.overview = in.readString();
+        this.originCountry = in.createStringArrayList();
+        this.popularity = (Double) in.readValue(Double.class.getClassLoader());
+        this.mediaType = in.readString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(this.originalName);
+        dest.writeValue(this.id);
+        dest.writeString(this.name);
+        dest.writeValue(this.voteCount);
+        dest.writeValue(this.voteAverage);
+        dest.writeString(this.firstAirDate);
+        dest.writeString(this.posterPath);
+        dest.writeList(this.genreIds);
+        dest.writeString(this.originalLanguage);
+        dest.writeString(this.backdropPath);
+        dest.writeString(this.overview);
+        dest.writeStringList(this.originCountry);
+        dest.writeValue(this.popularity);
+        dest.writeString(this.mediaType);
+    }
 }
