@@ -19,36 +19,22 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.tanaka.binge.ApiInterface;
 import com.tanaka.binge.Models.SearchResultModel;
 import com.tanaka.binge.Models.TvShowResult;
 import com.tanaka.binge.R;
 import com.tanaka.binge.Views.HomeAdapter;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.List;
 
-import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by Tanaka Mazi on 2019-10-20.
  * Copyright (c) 2019 All rights reserved.
  */
 public class SearchFragment extends Fragment implements SearchView.OnQueryTextListener {
-    ApiInterface apiInterface;
-    Retrofit retrofit;
-    OkHttpClient client;
     private RecyclerView recyclerView;
     private HomeAdapter adapter;
     private ProgressDialog progressDialog;
@@ -67,7 +53,6 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
 
@@ -78,7 +63,6 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
 
         recyclerView = view.findViewById(R.id.searchRecyclerView);
         linearLayoutManager = new LinearLayoutManager(getContext());
-
         showResultList = new ArrayList<>();
         adapter = new HomeAdapter(showResultList);
         recyclerView.setLayoutManager(linearLayoutManager);
@@ -87,11 +71,6 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
         progressDialog.setMessage("Loading....");
         prompTextView = view.findViewById(R.id.promptTextView);
         prompTextView.setVisibility(View.VISIBLE);
-
-        setUpRetrofit();
-
-
-
     }
 
     @Override
@@ -126,51 +105,22 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
     }
 
 
-    private void setUpRetrofit() {
-        client = new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-                HttpUrl url = request.url().newBuilder().addQueryParameter("api_key", getString(R.string.api_key)).build();
-                request = request.newBuilder().url(url).build();
-                return chain.proceed(request);
-            }
-        }).addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY)).build();
-
-
-        retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.themoviedb.org/3/")
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .build();
-
-        apiInterface = retrofit.create(ApiInterface.class);
-    }
 
     private void searchForShow(String showName) {
         adapter.setFavoritesList(HomeFragment.favoritesList);
-        apiInterface.searchForTMDBShow(showName).enqueue(new Callback<SearchResultModel>() {
+        TMDBAPI.getInstance.getApiInterface().searchForTMDBShow(showName).enqueue(new Callback<SearchResultModel>() {
             @Override
             public void onResponse(Call<SearchResultModel> call, Response<SearchResultModel> response) {
                 adapter.clear();
                 ArrayList<TvShowResult> tvShowResults = new ArrayList<>();
-//                if (response.body().getTotalResults() > 0 && response.body().getTotalResults() > 20) {
-//                    for (int i = 0; i < 8; i++) {//
-//                        if (response.body().getResults().get(i).getName() != null && response.body().getResults().get(i).getBackdropPath() != null) {
-//                            tvShowResults.add(response.body().getResults().get(i));
-//                        }//
-//                    }
-//
-//                    adapter.addAll(tvShowResults);
-//                } else {
-                    for (TvShowResult tvShow : response.body().getResults()) {
+
+                for (TvShowResult tvShow : response.body().getResults()) {
                         if (isValidTvShow(tvShow)) {
                             tvShowResults.add(tvShow);
                         }
                     }
                     adapter.addAll(tvShowResults);
-//                }
+
                 progressDialog.dismiss();
 
             }
@@ -189,11 +139,6 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
 
     }
 
-    private void generateDataList(List<TvShowResult> tvShowResults) {
-//adapter.setShowID
-        showResultList.addAll(tvShowResults);
-        adapter.notifyDataSetChanged();
-    }
 
     @Override
     public boolean onQueryTextSubmit(String query) {

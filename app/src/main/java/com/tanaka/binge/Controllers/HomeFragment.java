@@ -11,6 +11,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Observer;
+import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -25,28 +27,18 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.tanaka.binge.ApiInterface;
 import com.tanaka.binge.Models.TrendingResponseModel;
 import com.tanaka.binge.Models.TvShowResult;
 import com.tanaka.binge.PaginationScrollListener;
 import com.tanaka.binge.R;
 import com.tanaka.binge.Views.HomeAdapter;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import okhttp3.HttpUrl;
-import okhttp3.Interceptor;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
-import retrofit2.converter.gson.GsonConverterFactory;
 
 /**
  * Created by Tanaka Mazi on 2019-10-20.
@@ -61,10 +53,10 @@ public class HomeFragment extends Fragment {
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     private RecyclerView recyclerView;
     private HomeAdapter adapter;
-    private ApiInterface apiInterface;
-    private Retrofit retrofit;
+    private TvShowViewModel tvShowViewModel;
+
     private ProgressDialog progressDialog;
-    private OkHttpClient client;
+
     private ArrayList<TvShowResult> showResultList;
     private LinearLayoutManager linearLayoutManager;
     private boolean isLoading = false;
@@ -87,6 +79,7 @@ public class HomeFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+
         recyclerView = view.findViewById(R.id.homeRecyclerView);
         linearLayoutManager = new LinearLayoutManager(view.getContext());
         if (currentUser != null) {
@@ -104,7 +97,6 @@ public class HomeFragment extends Fragment {
             loadFavorites();
         }
 
-        setUpRetrofit();
         System.out.println("about to fetch data");
         if (savedInstanceState == null) {
             progressDialog.show();
@@ -122,8 +114,14 @@ public class HomeFragment extends Fragment {
                 if (currentUser != null) {
                     loadFavorites();
                 }
-                progressDialog.show();
-                loadNextPage();
+//                progressDialog.show();
+//                loadNextPage();
+                tvShowViewModel.getAllTvShows(currentPage).observe(HomeFragment.this, new Observer<List<TvShowResult>>() {
+                    @Override
+                    public void onChanged(List<TvShowResult> tvShowResults) {
+                        adapter.addAll((ArrayList<TvShowResult>) tvShowResults);
+                    }
+                });
             }
 
             @Override
@@ -141,6 +139,14 @@ public class HomeFragment extends Fragment {
                 return isLoading;
             }
         });
+
+        tvShowViewModel = ViewModelProviders.of(this).get(TvShowViewModel.class);
+        tvShowViewModel.getAllTvShows(currentPage).observe(this, new Observer<List<TvShowResult>>() {
+            @Override
+            public void onChanged(List<TvShowResult> tvShowResults) {
+                adapter.addAll((ArrayList<TvShowResult>) tvShowResults);
+            }
+        });
     }
 
     @Override
@@ -151,7 +157,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadNextPage() {
-        apiInterface.getTrendingShows(currentPage).enqueue(new Callback<TrendingResponseModel>() {
+        TMDBAPI.getInstance.getApiInterface().getTrendingShows(currentPage).enqueue(new Callback<TrendingResponseModel>() {
             @Override
             public void onResponse(Call<TrendingResponseModel> call, Response<TrendingResponseModel> response) {
                 isLoading = false;
@@ -173,35 +179,12 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    /**
-     * Sets up @link{Retrofit} client
-     */
-    private void setUpRetrofit() {
-        client = new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
-            @Override
-            public okhttp3.Response intercept(Chain chain) throws IOException {
-                Request request = chain.request();
-                HttpUrl url = request.url().newBuilder().addQueryParameter("api_key", getString(R.string.api_key)).build();
-                request = request.newBuilder().url(url).build();
-                return chain.proceed(request);
-            }
-        }).addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC)).build();
 
-
-        retrofit = new Retrofit.Builder()
-                .baseUrl("https://api.themoviedb.org/3/")
-                .client(client)
-                .addConverterFactory(GsonConverterFactory.create())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .build();
-
-        apiInterface = retrofit.create(ApiInterface.class);
-    }
 
     private void fetchData() {
 
 
-        apiInterface.getTrendingShows(currentPage).enqueue(new Callback<TrendingResponseModel>() {
+        TMDBAPI.getInstance.getApiInterface().getTrendingShows(currentPage).enqueue(new Callback<TrendingResponseModel>() {
             @Override
             public void onResponse(Call<TrendingResponseModel> call, Response<TrendingResponseModel> response) {
                 System.out.println(call.request());
