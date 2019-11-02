@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -13,6 +14,8 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -84,13 +87,19 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         Glide.with(holder.itemView.getContext()).clear(holder.background);
         Glide.with(holder.itemView.getContext()).clear(holder.posterImageView);
 
-        Glide.with(holder.itemView.getContext())
-                .load("https://image.tmdb.org/t/p/" + ImageSize.w500 + tvShow.getPosterPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
-                .fitCenter().into(holder.posterImageView);
+        Glide.with(holder.itemView)
+                .load("https://image.tmdb.org/t/p/" + ImageSize.w500 + tvShow.getPosterPath())
+
+                .override(500, 1000).thumbnail(0.5f)
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.ALL).fitCenter().into(holder.posterImageView);
 //        Picasso.get().load("https://image.tmdb.org/t/p/"+ImageSize.w780+tvShow.getPosterPath()).into(holder.posterImageView);
-        Glide.with(holder.itemView.getContext())
-                .load("https://image.tmdb.org/t/p/" + ImageSize.w780 + tvShow.getBackdropPath()).thumbnail(Glide.with(holder.itemView).load(R.drawable.loading).fitCenter())
-                .into(holder.background);
+        Glide.with(holder.itemView)
+                .load("https://image.tmdb.org/t/p/" + ImageSize.w780 + tvShow.getBackdropPath())
+                .thumbnail(0.5f)
+                .override(900, 800)
+                .skipMemoryCache(true)
+                .diskCacheStrategy(DiskCacheStrategy.ALL).apply(RequestOptions.centerCropTransform()).into(holder.background);
 //        Picasso.get().load("https://image.tmdb.org/t/p/"+ ImageSize.w780+tvShow.getBackdropPath()).fit().into(holder.background);
         holder.backdropURL = "https://image.tmdb.org/t/p/" + ImageSize.w780 + tvShow.getBackdropPath();
         holder.showID = tvShow.getId();
@@ -116,6 +125,9 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
                 }
             }
         });
+        Double two = 2.0;
+        Double rating = tvShow.getVoteAverage() / two;
+        holder.ratingBar.setRating(rating.floatValue());
 
 
     }
@@ -169,7 +181,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
         TextView yearTextView;
         TextView summaryTextView;
         ToggleButton favoriteButton;
-
+        RatingBar ratingBar;
         ImageView background;
         String backdropURL = "";
         int showID = 0;
@@ -184,6 +196,7 @@ public class HomeAdapter extends RecyclerView.Adapter<HomeAdapter.ViewHolder> {
             summaryTextView = itemView.findViewById(R.id.summaryTextView);
             background = itemView.findViewById(R.id.backgroundImageView);
             favoriteButton = itemView.findViewById(R.id.favButton);
+            ratingBar = itemView.findViewById(R.id.ratingBar);
 
 
         }

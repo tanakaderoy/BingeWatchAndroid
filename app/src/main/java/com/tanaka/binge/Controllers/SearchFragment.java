@@ -77,21 +77,19 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
 
         recyclerView = view.findViewById(R.id.searchRecyclerView);
-        linearLayoutManager = new LinearLayoutManager(view.getContext());
+        linearLayoutManager = new LinearLayoutManager(getContext());
 
         showResultList = new ArrayList<>();
         adapter = new HomeAdapter(showResultList);
         recyclerView.setLayoutManager(linearLayoutManager);
         recyclerView.setAdapter(adapter);
-        progressDialog = new ProgressDialog(view.getContext());
+        progressDialog = new ProgressDialog(getContext());
         progressDialog.setMessage("Loading....");
         prompTextView = view.findViewById(R.id.promptTextView);
         prompTextView.setVisibility(View.VISIBLE);
 
         setUpRetrofit();
-        System.out.println("about to fetch data");
 
-        System.out.println(showResultList);
 
 
     }
@@ -103,7 +101,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
         getActivity().getMenuInflater().inflate(R.menu.search_menu_items, menu);
         MenuItem item = menu.findItem(R.id.app_bar_search);
         SearchView searchView = (SearchView) MenuItemCompat.getActionView(item);
-        searchView.setOnQueryTextListener(this);
+        searchView.setOnQueryTextListener(SearchFragment.this);
 
         MenuItemCompat.setOnActionExpandListener(item, new MenuItemCompat.OnActionExpandListener() {
             @Override
@@ -157,22 +155,22 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
             public void onResponse(Call<SearchResultModel> call, Response<SearchResultModel> response) {
                 adapter.clear();
                 ArrayList<TvShowResult> tvShowResults = new ArrayList<>();
-                if (response.body().getTotalResults() > 0 && response.body().getTotalResults() > 20) {
-                    for (int i = 0; i < 8; i++) {//
-                        if (response.body().getResults().get(i).getName() != null && response.body().getResults().get(i).getBackdropPath() != null) {
-                            tvShowResults.add(response.body().getResults().get(i));
-                        }//
-                    }
-
-                    adapter.addAll(tvShowResults);
-                } else {
+//                if (response.body().getTotalResults() > 0 && response.body().getTotalResults() > 20) {
+//                    for (int i = 0; i < 8; i++) {//
+//                        if (response.body().getResults().get(i).getName() != null && response.body().getResults().get(i).getBackdropPath() != null) {
+//                            tvShowResults.add(response.body().getResults().get(i));
+//                        }//
+//                    }
+//
+//                    adapter.addAll(tvShowResults);
+//                } else {
                     for (TvShowResult tvShow : response.body().getResults()) {
-                        if (tvShow.getName() != null && tvShow.getBackdropPath() != null) {
+                        if (isValidTvShow(tvShow)) {
                             tvShowResults.add(tvShow);
                         }
                     }
                     adapter.addAll(tvShowResults);
-                }
+//                }
                 progressDialog.dismiss();
 
             }
@@ -185,6 +183,11 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
         });
     }
 
+    private Boolean isValidTvShow(TvShowResult tvShow) {
+        boolean b = tvShow.getName() != null && tvShow.getOverview() != null && tvShow.getBackdropPath() != null && tvShow.getPosterPath() != null;
+        return b;
+
+    }
 
     private void generateDataList(List<TvShowResult> tvShowResults) {
 //adapter.setShowID
@@ -198,6 +201,7 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
         adapter.notifyDataSetChanged();
         System.out.print(query);
         if (!query.isEmpty()) {
+            progressDialog.show();
             searchForShow(query);
         }
         return false;
@@ -212,7 +216,6 @@ public class SearchFragment extends Fragment implements SearchView.OnQueryTextLi
 
         }
         prompTextView.setVisibility(View.INVISIBLE);
-        System.out.println(newText);
         return false;
     }
 }

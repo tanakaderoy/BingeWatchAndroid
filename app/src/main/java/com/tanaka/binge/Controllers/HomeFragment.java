@@ -141,7 +141,6 @@ public class HomeFragment extends Fragment {
                 return isLoading;
             }
         });
-        Log.i("Created", "Created");
     }
 
     @Override
@@ -149,19 +148,6 @@ public class HomeFragment extends Fragment {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList("TvShows", showResultList);
         Log.i("Saved", "Saved");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.i("Resumed", "Resumed");
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        Log.i("Pause", "Paused");
-
     }
 
     private void loadNextPage() {
@@ -187,6 +173,9 @@ public class HomeFragment extends Fragment {
         });
     }
 
+    /**
+     * Sets up @link{Retrofit} client
+     */
     private void setUpRetrofit() {
         client = new OkHttpClient().newBuilder().addInterceptor(new Interceptor() {
             @Override
@@ -257,6 +246,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void loadFavorites() {
+        progressDialog.show();
         tvShowRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -266,6 +256,7 @@ public class HomeFragment extends Fragment {
                 }
                 adapter.setFavoritesList(favoritesList);
                 adapter.notifyDataSetChanged();
+                progressDialog.dismiss();
 
             }
         }).addOnFailureListener(new OnFailureListener() {

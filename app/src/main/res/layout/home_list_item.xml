@@ -9,10 +9,10 @@
 
     <ImageView
         android:id="@+id/backgroundImageView"
-        android:layout_width="412dp"
+        android:layout_width="0dp"
         android:layout_height="391dp"
         android:adjustViewBounds="true"
-        android:scaleType="center"
+        android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -24,7 +24,7 @@
         android:layout_width="127dp"
         android:layout_height="244dp"
         android:adjustViewBounds="true"
-        android:scaleType="center"
+        android:scaleType="fitCenter"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@color/colorPrimary"
@@ -33,9 +33,13 @@
 
     <TextView
         android:id="@+id/titleTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="235dp"
+        android:layout_height="50dp"
         android:text="TextView"
+        android:background="#54000000"
+        android:gravity="center"
+        android:textSize="20sp"
+
         android:textColor="@android:color/white"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"
@@ -44,16 +48,19 @@
 
     <TextView
         android:id="@+id/yearTextView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="233dp"
+        android:layout_height="56dp"
         android:layout_marginTop="32dp"
         android:layout_marginBottom="32dp"
         android:background="#3B000000"
         android:text="TextView"
+        android:gravity="center"
         android:textColor="@android:color/white"
+        android:textSize="20sp"
         app:layout_constraintBottom_toTopOf="@+id/summaryTextView"
         app:layout_constraintEnd_toEndOf="@+id/titleTextView"
         app:layout_constraintTop_toBottomOf="@+id/titleTextView"
+        app:layout_constraintVertical_bias="0.729"
         tools:layout_conversion_wrapHeight="50"
         tools:layout_conversion_wrapWidth="154" />
 
@@ -89,6 +96,20 @@
         app:layout_constraintBottom_toTopOf="@+id/summaryTextView"
         app:layout_constraintEnd_toEndOf="@+id/backgroundImageView"
         app:layout_constraintTop_toBottomOf="@+id/yearTextView"
+        app:layout_constraintVertical_bias="1.0"
         app:srcCompat="@android:drawable/btn_star" />
+
+    <RatingBar
+        android:id="@+id/ratingBar"
+        android:layout_width="235dp"
+        android:layout_height="50dp"
+        android:layout_marginTop="32dp"
+        android:background="#54000000"
+        android:foregroundGravity="center"
+
+        android:isIndicator="true"
+        android:numStars="5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/titleTextView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

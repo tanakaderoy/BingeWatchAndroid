@@ -1,15 +1,21 @@
 package com.tanaka.binge.Controllers;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -26,12 +32,15 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
 import com.tanaka.binge.R;
 
+import jp.wasabeef.glide.transformations.BlurTransformation;
+
 public class LoginActivity extends AppCompatActivity {
     public static final String TAG = "AndroidClarified";
     private SignInButton googleSignInButton;
     private GoogleSignInClient googleSignInClient;
     private FirebaseAuth mAuth;
     private ProgressDialog progressDialog;
+    private ImageView backgroundImageView;
 
 
 
@@ -39,6 +48,10 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        backgroundImageView = findViewById(R.id.loginBackgroundImageView);
+        Glide.with(this).load("https://thenypost.files.wordpress.com/2019/06/couch-potato-heart.jpg?quality=90&strip=all&w=1286")
+                .thumbnail(0.5f)
+                .apply(RequestOptions.bitmapTransform(new BlurTransformation(25, 2))).into(backgroundImageView);
         mAuth = FirebaseAuth.getInstance();
         progressDialog = new ProgressDialog(this);
         progressDialog.setMessage("Loading...");
@@ -60,12 +73,23 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager
+                = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
+    }
+
     @Override
     public void onStart() {
         super.onStart();
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            onLoggedIn(currentUser);
+            if (isNetworkAvailable()) {
+                onLoggedIn(currentUser);
+            } else {
+                Toast.makeText(getApplicationContext(), "No Network Available", Toast.LENGTH_SHORT).show();
+            }
         } else {
             googleSignInClient.signOut();
             Log.d(TAG, "Not logged in");
